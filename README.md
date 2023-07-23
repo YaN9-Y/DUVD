@@ -19,14 +19,15 @@ After downloading the dataset, please use scripts/flist.py to generate the file 
 python scripts/flist.py --path path_to_REVIDE_hazy_path --output ./datasets/revide_test.flist
 ```
 
-Please notice that the ground truth images of SOTS-indoor have additional white border, you can crop it first.
+Please notice that we conduct experiments on 4x downsampled version of the REVIDE dataset, you should downsample it first.
+[REVIDE dataset](https://github.com/BookerDeWitt/REVIDE_Dataset) | [NYU-Depth](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v1.html) | [Collected Real-world videos](https://drive.google.com/file/d/16_p7n7FO36Hm2-hvZkNe1xVq1cWK8Kc0/view?usp=drive_link)
 
 
 Getting Started
 --------------------------------------
 To use the pre-trained models, download it from the following link then copy it to the corresponding checkpoints folder. For instance, if you want to test the model on nyu/real-world hazy frames, download the pretrained model for nyu/real-world and put it under  `./checkpoints/test_real`
 
-[Pretrained model on REVIDE](https://drive.google.com/file/d/1E1E_4oK7e1YTYOd3WzQ9wI7PWAVp5M1O/view?usp=drive_link) | [Pretrained model on NYU-depth/Real-world](https://drive.google.com/file/d/1gF6PBdCHSSq6jkkeLGB5Ag0oMGOTJRyN/view?usp=drive_link)
+[Pretrained model on REVIDE](https://drive.google.com/file/d/1E1E_4oK7e1YTYOd3WzQ9wI7PWAVp5M1O/view?usp=drive_link) | [Pretrained model on NYU-depth/Real-world](https://drive.google.com/file/d/1gF6PBdCHSSq6jkkeLGB5Ag0oMGOTJRyN/view?usp=drive_link) 
 
 
 
