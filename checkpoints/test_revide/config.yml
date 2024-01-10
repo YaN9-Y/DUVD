@@ -1,0 +1,63 @@
+MODE: 1             # 1: train, 2: test, 3: eval
+MODEL: 1            # 2: train the inpaint model 3: load transformer, train encoder and decoder 5: train transformer 6: train reconstructor 
+SEED: 10           # random seed
+GPU: [0]            # list of gpu ids
+DEBUG: 0            # turns on debugging mode
+VERBOSE: 0          # turns on verbose mode in the output console
+TEST_MODE: hazy    
+
+TRAIN_CLEAN_FLIST: 
+TRAIN_HAZY_FLIST: 
+TEST_HAZY_FLIST: ./datasets/revide_test.flist         
+TEST_CLEAN_FLIST: 
+VAL_HAZY_FLIST: 
+VAL_CLEAN_FLIST: 
+
+
+LR: 0.0001
+WEIGHT_DECAY: 0                   # learning rate
+D2G_LR: 0.1                   # discriminator/generator learning rate ratio
+BETA1: 0.9                    # adam optimizer beta1
+BETA2: 0.999                    # adam optimizer beta2
+BATCH_SIZE: 1                 # input batch size for training1
+CROP_SIZE:  256               # input image size for training 0 for original size
+THRESHOLD_DEPTH: 0.5
+SATURATION_EPOCH: 50
+
+
+NORM_TYPE: instance
+MAX_ITERS: 600000                # maximum number of iterations to train the model
+BASE_CHANNEL_NUM: 96
+BLOCK_NUM: 4
+USE_COSDECAY: 1
+
+IS_DEBUG: 0
+MAX_TRANSLATION_FRONT: 0.15
+MAX_TRANSLATION_RIGHT: 0.1
+MAX_TRANSLATION_UP: 0.1
+MAX_ROTATION_X: 4
+MAX_ROTATION_Y: 4
+MIN_DEPTH: 0.5
+MAX_DEPTH: 4
+MIN_BETA: 0.2
+MAX_BETA: 1.0
+DISTANCE_WIDTH: 0.0235
+DISTANCE_HEIGHT: 0.0156
+FOCAL_LENGTH: 0.035
+T_MAX: 300
+
+GAN_LOSS_WEIGHT: 0.3
+CYCLE_LOSS_WEIGHT: 1
+RECYCLE_LOSS_WEIGHT: 0.2
+SPATIAL_LOSS_WEIGHT: 0.2
+BETA_LOSS_WEIGHT: 0.5
+
+
+GAN_LOSS: lsgan               # nsgan | lsgan | hinge
+GAN_POOL_SIZE: 0              # fake images pool size
+
+SAVE_INTERVAL: 2000           # how many iterations to wait before saving model (0: never)
+SAMPLE_INTERVAL: 2000       # how many iterations to wait before sampling (0: never)
+SAMPLE_SIZE: 1               # number of images to sample
+EVAL_INTERVAL: 1000             # how many iterations to wait before model evaluation (0: never)
+LOG_INTERVAL: 500              # how many iterations to wait before logging training status (0: never)
