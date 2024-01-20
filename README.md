@@ -25,9 +25,9 @@ Please notice that we conduct experiments on 4x downsampled version of the REVID
 
 Getting Started
 --------------------------------------
-To use the pre-trained models, download it from the following link then copy it to the corresponding checkpoints folder. For instance, if you want to test the model on nyu/real-world hazy frames, download the pretrained model for nyu/real-world and put it under  `./checkpoints/test_real`
+To use the pre-trained models, download it from the following link then copy it to the corresponding checkpoints folder. For instance, if you want to test the model on nyu/real-world hazy frames, download the pretrained model for nyu/real-world and put it under  `./checkpoints/test_real`. If you use the light model, remember to change the BASE_CHANNEL_NUM in config.yml from 96 to 64.
 
-[Pretrained model on REVIDE](https://drive.google.com/file/d/1E1E_4oK7e1YTYOd3WzQ9wI7PWAVp5M1O/view?usp=drive_link) | [Pretrained model on NYU-depth/Real-world](https://drive.google.com/file/d/1gF6PBdCHSSq6jkkeLGB5Ag0oMGOTJRyN/view?usp=drive_link) 
+[Pretrained model on REVIDE](https://drive.google.com/file/d/1E1E_4oK7e1YTYOd3WzQ9wI7PWAVp5M1O/view?usp=drive_link) | [Pretrained model on NYU-depth/Real-world](https://drive.google.com/file/d/1gF6PBdCHSSq6jkkeLGB5Ag0oMGOTJRyN/view?usp=drive_link) | [Pretrained light model on REVIDE](https://drive.google.com/file/d/1qwe5ZjQSQzo-QoiDETAj7fDohSLvFKGk/view?usp=drive_link) | [Pretrained light model on NYU-Depth/Real-world](https://drive.google.com/file/d/1F2ywh0YuAYGHmS13Hvx1bm1GHqFSUWwd/view?usp=drive_link)
 
 
 
