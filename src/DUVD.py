@@ -1,24 +1,17 @@
 import os
-import numpy as np
 import torch
-import torch.nn.functional as F
-import kornia
-import cv2
 from torch.utils.data import DataLoader
 from .dataset import Dataset
 from .models import Model
-from .utils import Progbar, create_dir, imsave
+from .utils import Progbar, create_dir,  imsave
 from .metrics import PSNR_RGB
-from torch.utils.tensorboard import SummaryWriter
 import math
 
 
 class DUVD():
     def __init__(self, config):
         self.config = config
-
         self.model = Model(config).to(config.DEVICE)
-
         self.psnr = PSNR_RGB(255.0).to(config.DEVICE)
 
         # test mode
@@ -41,11 +34,7 @@ class DUVD():
 
         self.samples_path = os.path.join(config.PATH, 'samples')
         self.results_path = os.path.join(config.PATH, 'results')
-        self.eval_path = os.path.join(config.PATH, 'eval')
         self.log_path = os.path.join(config.PATH, 'logs')
-
-        # if config.RESULTS is not None:
-        #     self.results_path = os.path.join(config.RESULTS)
 
         if config.DEBUG is not None and config.DEBUG != 0:
             self.debug = True
@@ -55,6 +44,75 @@ class DUVD():
     def load(self):
         self.model.load()
 
+    def save(self, save_best=False, psnr=None, iteration=None):
+        self.model.save(save_best, psnr, iteration)
+
+    def train(self):
+        train_loader = DataLoader(
+            dataset=self.train_dataset,
+            batch_size=self.config.BATCH_SIZE,
+            num_workers=4,
+            drop_last=True,
+            shuffle=True
+        )
+
+        keep_training = True
+        model = self.config.MODEL
+        max_iteration = int(float((self.config.MAX_ITERS)))
+        total = len(self.train_dataset)
+        epoch = self.model.epoch
+        self.loss_list = []
+        if total == 0:
+            print('No training data was provided! Check \'TRAIN_FLIST\' value in the configuration file.')
+            return
+
+        while (keep_training):
+            epoch += 1
+            print('\n\nTraining epoch: %d' % epoch)
+
+            progbar = Progbar(total, width=20, stateful_metrics=['epoch', 'iter'])
+            print('epoch:', epoch)
+
+            index = 0
+
+            for items in train_loader:
+                self.model.train()
+                clean_images, hazy_images, more_clean_images, more_hazy_images = self.cuda(items[0], items[1], items[2],
+                                                                                           items[3])
+
+                if model == 1:
+                    outputs, gen_loss, dis_loss, logs = self.model.process(clean_images, hazy_images)
+                    psnr = self.psnr(self.postprocess(clean_images), self.postprocess(outputs))
+                    logs.append(('psnr_cyc', psnr.item()))
+                    iteration = self.model.iteration
+
+                elif model == 2:
+                    iteration = self.model.iteration
+
+                if iteration >= max_iteration:
+                    keep_training = False
+                    break
+
+                logs = [
+                           ("epoch", epoch),
+                           ("iter", iteration),
+                       ] + logs
+
+                index += 1
+                progbar.add(len(clean_images), values=logs if self.config.VERBOSE else [x for x in logs])
+
+                # log model at checkpoints
+                if self.config.LOG_INTERVAL and iteration % self.config.LOG_INTERVAL == 0:
+                    self.log(logs)
+
+                # save model at checkpoints
+                if self.config.SAVE_INTERVAL and iteration % self.config.SAVE_INTERVAL == 0:
+                    self.save()
+
+            # update epoch for scheduler
+            self.model.epoch = epoch
+            self.model.update_scheduler()
+        print('\nEnd training....')
 
     def test(self):
         model = self.config.MODEL
@@ -66,46 +124,27 @@ class DUVD():
         )
 
         index = 0
-
-        psnrs = []
-        times = []
-
         with torch.no_grad():
             for items in test_loader:
+
                 if self.test_dataset.split == 'hazy':
-
                     name = self.test_dataset.load_name(index)[:-4] + '.png'
-
                     hazy_images = items.to(self.config.DEVICE)
                     index += 1
 
                     if model == 1:
                         torch.cuda.empty_cache()
-                        ## check if the input size is multiple of 4
                         h, w = hazy_images.shape[2:4]
-                        print(hazy_images.shape)
-                        if h * w > 1000 * 1000:
-                            continue
                         hazy_input_images = self.pad_input(hazy_images)
-                        start = torch.cuda.Event(enable_timing=True)
-                        end = torch.cuda.Event(enable_timing=True)
-                        start.record()
                         predicted_results = self.model.forward_h2c(hazy_input_images)
-                        end.record()
-                        torch.cuda.synchronize()
-                        times.append(start.elapsed_time(end))
                         predicted_results = self.crop_result(predicted_results, h, w)
                         predicted_results = self.postprocess(predicted_results)[0]
-
                         path = os.path.join(self.results_path, self.model.name)
                         create_dir(path)
                         save_name = os.path.join(path, name)
                         imsave(predicted_results, save_name)
                         print(save_name)
 
-
-            print('AVG times:' + str(np.mean(times)))
-            print('Total PSNR_' + ('YCbCr:' if self.config.PSNR == 'YCbCr' else 'RGB:'), np.mean(psnrs))
             print('\nEnd test....')
 
 
@@ -132,26 +171,6 @@ class DUVD():
         img = img.permute(0, 2, 3, 1)
         return img.int()
 
-    def generate_color_map(self, imgs, size=[256, 256]):
-        # N 1 H W -> N H W 3 color map
-        if torch.max(imgs) > 1 or torch.min(imgs) < 0:
-            imgs = self.minmax_depth(imgs, blur=True)
-        imgs = (imgs * 255.0).int().squeeze(1).cpu().numpy().astype(np.uint8)
-        N, height, width = imgs.shape
-
-        colormaps = np.full((N, size[0], size[1], 3), 1)
-
-        for i in range(imgs.shape[0]):
-            colormaps[i] = cv2.resize((cv2.applyColorMap(imgs[i], cv2.COLORMAP_HOT)), (size[1], size[0]))
-
-        # transfer to tensor than to gpu
-        # firstly the channel BGR->RGB
-        colormaps = colormaps[..., [2, 1, 0]]
-
-        # than to tensor, to gpu
-        colormaps = torch.from_numpy(colormaps).cuda()
-
-        return colormaps
 
     def crop_result(self, result, input_h, input_w, times=32):
         crop_h = crop_w = 0
@@ -179,25 +198,8 @@ class DUVD():
         if input_w % times != 0:
             pad_w = times - (input_w % times)
 
-        # print(pad_h, pad_w)
-
         input = torch.nn.functional.pad(input, (0, pad_w, 0, pad_h), mode='reflect')
 
         return input
 
-    def minmax_depth(self, depth, blur=True):
-        n, c, h, w = depth.shape
-        # depth = F.avg_pool2d(depth,kernel_size=5)
-
-        if blur:
-            depth = F.pad(depth, [4, 4, 4, 4], 'reflect')
-            depth = kornia.filters.median_blur(depth, (9, 9))
-            depth = depth[:, :, 3:h - 3, 3:w - 3]
-
-        D_max = torch.max(depth.reshape(n, c, -1), dim=2, keepdim=True)[0].unsqueeze(3)
-        D_min = torch.min(depth.reshape(n, c, -1), dim=2, keepdim=True)[0].unsqueeze(3)
-
-        depth = (depth - D_min) / (D_max - D_min + 0.01)
-
-        return depth
 

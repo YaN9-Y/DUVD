@@ -34,21 +34,3 @@ class PSNR_RGB(nn.Module):
         psnr = 10*torch.log10(255*255 / mse)
 
         return psnr
-
-class PSNR_YCbcr(nn.Module):
-    def __init__(self):
-        super(PSNR_YCbcr, self).__init__()
-
-    def __call__(self, a, b):
-        a = a.float()[0]
-        b = b.float()[0]
-        Y_a = 0.256789*a[...,0] + 0.504129*a[...,1] + 0.097906*a[...,2] + 16
-        Y_b = 0.256789*b[...,0] + 0.504129*b[...,1] + 0.097906*b[...,2] + 16
-
-        mse = torch.mean((Y_a-Y_b)**2)
-        if mse == 0:
-            return torch.tensor(0)
-
-        psnr = 10*torch.log10(255*255/mse)
-
-        return psnr

@@ -54,19 +54,6 @@ def _make_scratch(in_shape, out_shape, groups=1, expand=False):
     return scratch
 
 
-
-#def _make_pretrained_efficientnet_lite3(use_pretrained, exportable=False):
-#    efficientnet = torch.hub.load(
-#        "/home/xteam/.cache/torch/hub/rwightman_gen-efficientnet-pytorch_master",
-#        "tf_efficientnet_lite3",
-#        pretrained=use_pretrained,
-#        source='local',
-#        exportable=exportable,
-#        force_reload=False    )
-#    return _make_efficientnet_backbone(efficientnet)
-
-
-
 def _make_pretrained_efficientnet_lite3(use_pretrained, exportable=False):
      efficientnet = torch.hub.load(
          "rwightman/gen-efficientnet-pytorch",
@@ -142,79 +129,6 @@ class Interpolate(nn.Module):
 
         return x
 
-
-class ResidualConvUnit(nn.Module):
-    """Residual convolution module.
-    """
-
-    def __init__(self, features):
-        """Init.
-
-        Args:
-            features (int): number of features
-        """
-        super().__init__()
-
-        self.conv1 = nn.Conv2d(
-            features, features, kernel_size=3, stride=1, padding=1, bias=True
-        )
-
-        self.conv2 = nn.Conv2d(
-            features, features, kernel_size=3, stride=1, padding=1, bias=True
-        )
-
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        """Forward pass.
-
-        Args:
-            x (tensor): input
-
-        Returns:
-            tensor: output
-        """
-        out = self.relu(x)
-        out = self.conv1(out)
-        out = self.relu(out)
-        out = self.conv2(out)
-
-        return out + x
-
-
-class FeatureFusionBlock(nn.Module):
-    """Feature fusion block.
-    """
-
-    def __init__(self, features):
-        """Init.
-
-        Args:
-            features (int): number of features
-        """
-        super(FeatureFusionBlock, self).__init__()
-
-        self.resConfUnit1 = ResidualConvUnit(features)
-        self.resConfUnit2 = ResidualConvUnit(features)
-
-    def forward(self, *xs):
-        """Forward pass.
-
-        Returns:
-            tensor: output
-        """
-        output = xs[0]
-
-        if len(xs) == 2:
-            output += self.resConfUnit1(xs[1])
-
-        output = self.resConfUnit2(output)
-
-        output = nn.functional.interpolate(
-            output, scale_factor=2, mode="bilinear", align_corners=True
-        )
-
-        return output
 
 
 
