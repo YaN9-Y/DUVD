@@ -12,7 +12,7 @@ The detailed prerequiesites are in `environment.yml`
 
 Datasets
 ---------------------------------
-### 1.Data for testing
+### 1.Data for training and testing.
 After downloading the dataset, please use scripts/flist.py to generate the file lists. For example, to generate the file list on the revide testset, you should run:
 
 ```
@@ -29,7 +29,13 @@ To use the pre-trained models, download it from the following link then copy it 
 
 [Pretrained model on REVIDE](https://drive.google.com/file/d/1E1E_4oK7e1YTYOd3WzQ9wI7PWAVp5M1O/view?usp=drive_link) | [Pretrained model on NYU-depth/Real-world](https://drive.google.com/file/d/1gF6PBdCHSSq6jkkeLGB5Ag0oMGOTJRyN/view?usp=drive_link) | [Pretrained light model on REVIDE](https://drive.google.com/file/d/1qwe5ZjQSQzo-QoiDETAj7fDohSLvFKGk/view?usp=drive_link) | [Pretrained light model on NYU-Depth/Real-world](https://drive.google.com/file/d/1F2ywh0YuAYGHmS13Hvx1bm1GHqFSUWwd/view?usp=drive_link)
 
-
+### 1. Training 
+1) Prepare the training datasets following the operations in the Datasets part. 
+2) Add a config file 'config.yml' in the checkpoints folder. We have provided example checkpoints folder and config files in `./checkpoints/train_example`. Make sure TRAIN_CLEAN_FLIST and TRAIN_HAZY_FLIST are right. 
+3) Train the model, for example:
+```
+python train.py --model 1 --checkpoints ./checkpoints/train_example
+```
 
 ### 2. Testing
 1)Prepare the testing datasets following the operations in the Datasets part.
