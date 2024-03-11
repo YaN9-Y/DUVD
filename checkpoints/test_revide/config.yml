@@ -21,8 +21,7 @@ BETA1: 0.9                    # adam optimizer beta1
 BETA2: 0.999                    # adam optimizer beta2
 BATCH_SIZE: 1                 # input batch size for training1
 CROP_SIZE:  256               # input image size for training 0 for original size
-THRESHOLD_DEPTH: 0.5
-SATURATION_EPOCH: 50
+
 
 
 NORM_TYPE: instance
@@ -57,7 +56,4 @@ GAN_LOSS: lsgan               # nsgan | lsgan | hinge
 GAN_POOL_SIZE: 0              # fake images pool size
 
 SAVE_INTERVAL: 2000           # how many iterations to wait before saving model (0: never)
-SAMPLE_INTERVAL: 2000       # how many iterations to wait before sampling (0: never)
-SAMPLE_SIZE: 1               # number of images to sample
-EVAL_INTERVAL: 1000             # how many iterations to wait before model evaluation (0: never)
 LOG_INTERVAL: 500              # how many iterations to wait before logging training status (0: never)

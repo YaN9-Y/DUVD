@@ -4,14 +4,16 @@ SEED: 10           # random seed
 GPU: [0]            # list of gpu ids
 DEBUG: 0            # turns on debugging mode
 VERBOSE: 0          # turns on verbose mode in the output console
-TEST_MODE: hazy    
+TEST_MODE: hazy     
 
-TRAIN_CLEAN_FLIST: 
-TRAIN_HAZY_FLIST: 
-TEST_HAZY_FLIST: ./datasets/real_test.flist         
-TEST_CLEAN_FLIST: ./datasets/real_test.flist
-VAL_HAZY_FLIST: 
-VAL_CLEAN_FLIST: 
+TRAIN_CLEAN_FLIST: ./datasets/revide_train_clean.flist
+TRAIN_HAZY_FLIST: ./datasets/revide_train_hazy.flist
+TEST_HAZY_FLIST: ./datasets/revide_test_hazy.flist
+TEST_CLEAN_FLIST: ./datasets/revide_test_clean.flist
+VAL_HAZY_FLIST: ./datasets/revide_test_hazy.flist
+VAL_CLEAN_FLIST: ./datasets/revide_test_clean.flist
+
+
 
 
 LR: 0.0001
@@ -44,7 +46,9 @@ DISTANCE_HEIGHT: 0.0156
 FOCAL_LENGTH: 0.035
 T_MAX: 300
 
+
 GAN_LOSS_WEIGHT: 0.3
+PERCEPTUAL_LOSS_WEIGHT: 0
 CYCLE_LOSS_WEIGHT: 1
 RECYCLE_LOSS_WEIGHT: 0.2
 SPATIAL_LOSS_WEIGHT: 0.2
